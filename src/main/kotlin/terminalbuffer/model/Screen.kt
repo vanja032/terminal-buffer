@@ -17,7 +17,7 @@ class Screen(
 
     operator fun get(row: Int): Row {
         validateRowIndex(row)
-        return rows[row]
+        return rows.elementAt(row)
     }
 
     fun scroll(): Row{
