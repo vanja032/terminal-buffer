@@ -8,7 +8,15 @@ assignees: ''
 ---
 
 ## Task title
+
 ...
 
 ### Describe the task that should be done
+
 ...
+
+### Acceptance Criteria
+
+-
+-
+-
