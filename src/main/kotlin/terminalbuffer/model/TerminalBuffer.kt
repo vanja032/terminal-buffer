@@ -58,4 +58,28 @@ class TerminalBuffer(
         require(n >= 0) { "Movement $n must be non-negative" }
         cursor = cursor.copy(column = (cursor.column + n).coerceAtMost(width - 1))
     }
+
+    fun moveCursorOnStartLine() { cursor = cursor.copy(column = 0) }
+
+    fun writeChar(char: Char) {
+        setCellAt(cursor.row, cursor.column, createCell(char))
+
+        if (cursor.column == width - 1) newLine()
+        else moveCursorRight()
+    }
+
+    private fun newLine() {
+        moveCursorOnStartLine()
+
+        if (cursor.row < height - 1) {
+            moveCursorDown()
+        }
+        else {
+            scrollback.add(screen.scroll())
+        }
+    }
+
+    fun writeText(text: String) {
+        for (char in text) writeChar(char)
+    }
 }

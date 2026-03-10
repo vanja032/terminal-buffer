@@ -188,4 +188,93 @@ class TerminalBufferTest {
 
         assertEquals(4, buffer.cursor.column)
     }
+
+    @Test
+    fun `should write text within single line`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABC")
+
+        assertEquals("ABC  ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+        assertEquals("     ", buffer[2].asString())
+
+        assertEquals(0, buffer.cursor.row)
+        assertEquals(3, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should wrap text to next line when reaching line end`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDE")
+
+        assertEquals("ABCDE", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+        assertEquals("     ", buffer[2].asString())
+
+        assertEquals(1, buffer.cursor.row)
+        assertEquals(0, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should write text across multiple lines`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDEFG")
+
+        assertEquals("ABCDE", buffer[0].asString())
+        assertEquals("FG   ", buffer[1].asString())
+        assertEquals("     ", buffer[2].asString())
+
+        assertEquals(1, buffer.cursor.row)
+        assertEquals(2, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should scroll screen when writing past bottom`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJK")
+
+        assertEquals("FGHIJ", buffer[0].asString())
+        assertEquals("K    ", buffer[1].asString())
+
+        assertEquals(1, buffer.scrollback.size())
+        assertEquals("ABCDE", buffer.scrollback[0].asString())
+
+        assertEquals(1, buffer.cursor.row)
+        assertEquals(1, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should preserve multiple scrolled rows in scrollback`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJKLMNOP")
+
+        assertEquals(2, buffer.scrollback.size())
+        assertEquals("ABCDE", buffer.scrollback[0].asString())
+        assertEquals("FGHIJ", buffer.scrollback[1].asString())
+
+        assertEquals("KLMNO", buffer[0].asString())
+        assertEquals("P    ", buffer[1].asString())
+
+        assertEquals(1, buffer.cursor.row)
+        assertEquals(1, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should respect scrollback max size while scrolling`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 2)
+
+        buffer.writeText("ABCDEFGHIJKLMNOPQRSTU")
+
+        assertEquals(2, buffer.scrollback.size())
+        assertEquals("FGHIJ", buffer.scrollback[0].asString())
+        assertEquals("KLMNO", buffer.scrollback[1].asString())
+
+        assertEquals("PQRST", buffer[0].asString())
+        assertEquals("U    ", buffer[1].asString())
+    }
 }
