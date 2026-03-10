@@ -1,5 +1,6 @@
 package terminalbuffer.model
 
+import com.vanjasretenovic.terminalbuffer.model.CursorPosition
 import com.vanjasretenovic.terminalbuffer.model.Row
 import com.vanjasretenovic.terminalbuffer.model.TerminalBuffer
 
@@ -61,6 +62,50 @@ class TerminalBufferTest {
 
         assertThrows(IllegalArgumentException::class.java) {
             buffer[3]
+        }
+    }
+
+    @Test
+    fun `should initialize cursor at top left position`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        assertEquals(0, buffer.cursor.row)
+        assertEquals(0, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should set cursor within screen bounds`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.setCursor(CursorPosition(row = 2, column = 4))
+
+        assertEquals(2, buffer.cursor.row)
+        assertEquals(4, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should throw when setting cursor outside screen row bounds`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.setCursor(CursorPosition(row = -1, column = 0))
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.setCursor(CursorPosition(row = 3, column = 0))
+        }
+    }
+
+    @Test
+    fun `should throw when setting cursor outside screen column bounds`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.setCursor(CursorPosition(row = 0, column = -1))
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.setCursor(CursorPosition(row = 0, column = 5))
         }
     }
 }
