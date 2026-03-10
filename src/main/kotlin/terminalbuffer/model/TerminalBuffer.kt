@@ -38,4 +38,24 @@ class TerminalBuffer(
         validateCursorPosition(cursorPosition)
         cursor = cursorPosition
     }
+
+    fun moveCursorUp(n: Int = 1) {
+        require(n >= 0) { "Movement $n must be non-negative" }
+        cursor = cursor.copy(row = (cursor.row - n).coerceAtLeast(0))
+    }
+
+    fun moveCursorDown(n: Int = 1) {
+        require(n >= 0) { "Movement $n must be non-negative" }
+        cursor = cursor.copy(row = (cursor.row + n).coerceAtMost(height - 1))
+    }
+
+    fun moveCursorLeft(n: Int = 1) {
+        require(n >= 0) { "Movement $n must be non-negative" }
+        cursor = cursor.copy(column = (cursor.column - n).coerceAtLeast(0))
+    }
+
+    fun moveCursorRight(n: Int = 1) {
+        require(n >= 0) { "Movement $n must be non-negative" }
+        cursor = cursor.copy(column = (cursor.column + n).coerceAtMost(width - 1))
+    }
 }

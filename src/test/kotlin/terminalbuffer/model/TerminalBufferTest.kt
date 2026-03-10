@@ -108,4 +108,84 @@ class TerminalBufferTest {
             buffer.setCursor(CursorPosition(row = 0, column = 5))
         }
     }
+
+    @Test
+    fun `should move cursor up`() {
+        val buffer = TerminalBuffer(5, 3, 10)
+
+        buffer.setCursor(CursorPosition(2, 2))
+        buffer.moveCursorUp()
+
+        assertEquals(1, buffer.cursor.row)
+    }
+
+    @Test
+    fun `should clamp cursor when moving above screen`() {
+        val buffer = TerminalBuffer(5, 3, 10)
+
+        buffer.setCursor(CursorPosition(0, 2))
+        buffer.moveCursorUp(5)
+
+        assertEquals(0, buffer.cursor.row)
+    }
+
+    @Test
+    fun `should move cursor down`() {
+        val buffer = TerminalBuffer(5, 3, 10)
+
+        buffer.setCursor(CursorPosition(0, 2))
+        buffer.moveCursorDown()
+
+        assertEquals(1, buffer.cursor.row)
+    }
+
+    @Test
+    fun `should clamp cursor when moving below screen`() {
+        val buffer = TerminalBuffer(5, 3, 10)
+
+        buffer.setCursor(CursorPosition(2, 2))
+        buffer.moveCursorDown(5)
+
+        assertEquals(2, buffer.cursor.row)
+    }
+
+    @Test
+    fun `should move cursor left`() {
+        val buffer = TerminalBuffer(5, 3, 10)
+
+        buffer.setCursor(CursorPosition(1, 3))
+        buffer.moveCursorLeft()
+
+        assertEquals(2, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should clamp cursor when moving left beyond screen`() {
+        val buffer = TerminalBuffer(5, 3, 10)
+
+        buffer.setCursor(CursorPosition(1, 0))
+        buffer.moveCursorLeft(5)
+
+        assertEquals(0, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should move cursor right`() {
+        val buffer = TerminalBuffer(5, 3, 10)
+
+        buffer.setCursor(CursorPosition(1, 1))
+        buffer.moveCursorRight()
+
+        assertEquals(2, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should clamp cursor when moving right beyond screen`() {
+        val buffer = TerminalBuffer(5, 3, 10)
+
+        buffer.setCursor(CursorPosition(1, 4))
+        buffer.moveCursorRight(5)
+
+        assertEquals(4, buffer.cursor.column)
+    }
 }
