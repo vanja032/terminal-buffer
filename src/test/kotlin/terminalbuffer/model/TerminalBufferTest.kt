@@ -513,4 +513,67 @@ class TerminalBufferTest {
         assertEquals(1, buffer.scrollback.size())
         assertEquals("FGHIJ", buffer.scrollback[0].asString())
     }
+
+    @Test
+    fun `should clear all screen rows`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDEFG")
+        buffer.clearScreen()
+
+        assertEquals("     ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+        assertEquals("     ", buffer[2].asString())
+    }
+
+    @Test
+    fun `should preserve scrollback when clearing screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJ")
+        buffer.clearScreen()
+
+        assertEquals(1, buffer.scrollback.size())
+        assertEquals("ABCDE", buffer.scrollback[0].asString())
+        assertEquals("     ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+    }
+
+    @Test
+    fun `should reset cursor when clearing screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABC")
+        buffer.setCursor(CursorPosition(1, 3))
+
+        buffer.clearScreen()
+
+        assertEquals(0, buffer.cursor.row)
+        assertEquals(0, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should preserve screen dimensions when clearing screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDEFG")
+        buffer.clearScreen()
+
+        assertEquals(5, buffer[0].width)
+        assertEquals(5, buffer[1].width)
+        assertEquals(5, buffer[2].width)
+    }
+
+    @Test
+    fun `should clear already empty screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.clearScreen()
+
+        assertEquals("     ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+        assertEquals("     ", buffer[2].asString())
+        assertEquals(0, buffer.cursor.row)
+        assertEquals(0, buffer.cursor.column)
+    }
 }
