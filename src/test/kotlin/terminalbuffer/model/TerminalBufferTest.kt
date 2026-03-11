@@ -3,6 +3,8 @@ package terminalbuffer.model
 import com.vanjasretenovic.terminalbuffer.model.CursorPosition
 import com.vanjasretenovic.terminalbuffer.model.Row
 import com.vanjasretenovic.terminalbuffer.model.TerminalBuffer
+import com.vanjasretenovic.terminalbuffer.model.TerminalColor
+import com.vanjasretenovic.terminalbuffer.model.TextStyle
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -638,5 +640,111 @@ class TerminalBufferTest {
         assertEquals("     ", buffer[1].asString())
         assertEquals(0, buffer.cursor.row)
         assertEquals(0, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should get character from screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABC")
+
+        assertEquals('A', buffer.getCharAt(0, 0))
+        assertEquals('B', buffer.getCharAt(0, 1))
+        assertEquals('C', buffer.getCharAt(0, 2))
+        assertEquals(null, buffer.getCharAt(0, 3))
+    }
+
+    @Test
+    fun `should get character from scrollback`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJ")
+
+        assertEquals('A', buffer.getCharAt(0, 0, fromHistory = true))
+        assertEquals('E', buffer.getCharAt(0, 4, fromHistory = true))
+    }
+
+    @Test
+    fun `should get attributes from screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("A")
+
+        val cell = buffer.getAttributesAt(0, 0)
+
+        assertEquals('A', cell.character)
+        assertEquals(TerminalColor.DEFAULT, cell.foreground)
+        assertEquals(TerminalColor.DEFAULT, cell.background)
+        assertEquals(TextStyle(), cell.style)
+    }
+
+    @Test
+    fun `should get line as string from screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABC")
+
+        assertEquals("ABC  ", buffer.getLineAsString(0))
+        assertEquals("     ", buffer.getLineAsString(1))
+    }
+
+    @Test
+    fun `should get line as string from scrollback`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJ")
+
+        assertEquals("ABCDE", buffer.getLineAsString(0, fromHistory = true))
+    }
+
+    @Test
+    fun `should get entire screen content as string`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDEFG")
+
+        assertEquals(
+            "ABCDE\nFG   \n     ",
+            buffer.getScreenContent()
+        )
+    }
+
+    @Test
+    fun `should get full content including scrollback and screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJ")
+
+        assertEquals(
+            "ABCDE\nFGHIJ\n     ",
+            buffer.getFullContent()
+        )
+    }
+
+    @Test
+    fun `should throw when screen row index is invalid`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.getLineAsString(3)
+        }
+    }
+
+    @Test
+    fun `should throw when scrollback row index is invalid`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.getLineAsString(0, fromHistory = true)
+        }
+    }
+
+    @Test
+    fun `should throw when column index is invalid`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.getCharAt(0, 5)
+        }
     }
 }
