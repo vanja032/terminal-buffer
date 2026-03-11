@@ -407,4 +407,43 @@ class TerminalBufferTest {
         assertEquals("ZFGHI", buffer[0].asString())
         assertEquals("J    ", buffer[1].asString())
     }
+
+    @Test
+    fun `should fill line with character`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.fillLine(1, 'X')
+
+        assertEquals("XXXXX", buffer[1].asString())
+    }
+
+    @Test
+    fun `should clear line when filling with null`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDE")
+        buffer.fillLine(0, null)
+
+        assertEquals("     ", buffer[0].asString())
+    }
+
+    @Test
+    fun `should not modify other lines when filling`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDE")
+        buffer.fillLine(1, 'X')
+
+        assertEquals("ABCDE", buffer[0].asString())
+        assertEquals("XXXXX", buffer[1].asString())
+    }
+
+    @Test
+    fun `should throw when row index is invalid`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.fillLine(3, 'X')
+        }
+    }
 }
