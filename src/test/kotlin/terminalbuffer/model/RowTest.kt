@@ -63,4 +63,54 @@ class RowTest {
 
         assertEquals("XXXX", row.asString())
     }
+
+    @Test
+    fun `should increase row width by appending empty cells`() {
+        val row = Row(3)
+        row[0] = Cell('A')
+        row[1] = Cell('B')
+        row[2] = Cell('C')
+
+        row.resize(5)
+
+        assertEquals(5, row.width)
+        assertEquals("ABC  ", row.asString())
+    }
+
+    @Test
+    fun `should decrease row width by truncating right side`() {
+        val row = Row(5)
+        row[0] = Cell('A')
+        row[1] = Cell('B')
+        row[2] = Cell('C')
+        row[3] = Cell('D')
+        row[4] = Cell('E')
+
+        row.resize(3)
+
+        assertEquals(3, row.width)
+        assertEquals("ABC", row.asString())
+    }
+
+    @Test
+    fun `should keep row content unchanged when resizing to same width`() {
+        val row = Row(3)
+        row[0] = Cell('A')
+        row[1] = Cell('B')
+        row[2] = Cell('C')
+
+        row.resize(3)
+
+        assertEquals(3, row.width)
+        assertEquals("ABC", row.asString())
+    }
+
+    @Test
+    fun `should throw when resizing row to non positive width`() {
+        val row = Row(3)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            row.resize(0)
+        }
+    }
 }

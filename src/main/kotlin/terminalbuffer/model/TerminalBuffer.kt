@@ -1,20 +1,26 @@
 package com.vanjasretenovic.terminalbuffer.model
 
 class TerminalBuffer(
-    val width: Int,
-    val height: Int,
+    val initialWidth: Int,
+    val initialHeight: Int,
     val historySize: Int
 ) {
     val screen: Screen
     val scrollback: Scrollback
     var cursor: CursorPosition = CursorPosition(0, 0)
         private set
+    var width: Int
+        private set
+    var height: Int
+        private set
 
     init {
-        require(width > 0 && height > 0) { "Invalid terminal screen size: $width x $height" }
+        require(initialWidth > 0 && initialHeight > 0) { "Invalid terminal screen size: $initialWidth x $initialHeight" }
         require(historySize > 0) { "Invalid history size: $historySize, must be greater than zero" }
 
-        screen = Screen(width, height)
+        width = initialWidth
+        height = initialHeight
+        screen = Screen(initialWidth, initialHeight)
         scrollback = Scrollback(historySize)
     }
 
@@ -105,7 +111,8 @@ class TerminalBuffer(
         var savedCursor = CursorPosition(0, 0)
 
         while (index < tmpText.length) {
-            if(!getCurrentCell().isEmpty) tmpText += getCurrentCell().character
+            val currentCell = getCurrentCell()
+            if (!currentCell.isEmpty) tmpText += currentCell.character!!
             writeChar(tmpText[index++])
             if(index == text.length) savedCursor = cursor.copy()
         }
@@ -165,5 +172,20 @@ class TerminalBuffer(
         val history = (0 until scrollback.size()).map { scrollback[it].asString() }
         val visible = (0 until height).map { screen[it].asString() }
         return (history + visible).joinToString("\n")
+    }
+
+    fun resize(newWidth: Int, newHeight: Int) {
+        require(newWidth > 0) { "New width must be greater than zero" }
+        require(newHeight > 0) { "New height must be greater than zero" }
+
+        val removed = screen.resize(newWidth, newHeight)
+        scrollback.resize(newWidth)
+
+        if (removed.isNotEmpty()) for(row in removed) scrollback.add(row)
+
+        width = newWidth
+        height = newHeight
+
+        setCursor(CursorPosition(cursor.row.coerceAtMost(height - 1), cursor.column.coerceAtMost(width - 1)))
     }
 }

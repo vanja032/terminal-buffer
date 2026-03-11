@@ -16,7 +16,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should initialize terminal buffer with screen and scrollback`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         assertNotNull(buffer.screen)
         assertNotNull(buffer.scrollback)
@@ -27,7 +27,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should expose screen rows through buffer index operator`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         val row: Row = buffer[1]
 
@@ -37,27 +37,27 @@ class TerminalBufferTest {
     @Test
     fun `should throw when width is not positive`() {
         assertThrows(IllegalArgumentException::class.java) {
-            TerminalBuffer(width = 0, height = 3, historySize = 10)
+            TerminalBuffer(0, 3, 10)
         }
     }
 
     @Test
     fun `should throw when height is not positive`() {
         assertThrows(IllegalArgumentException::class.java) {
-            TerminalBuffer(width = 5, height = 0, historySize = 10)
+            TerminalBuffer(5, 0, 10)
         }
     }
 
     @Test
     fun `should throw when scrollback size is not positive`() {
         assertThrows(IllegalArgumentException::class.java) {
-            TerminalBuffer(width = 5, height = 3, historySize = 0)
+            TerminalBuffer(5, 3, 0)
         }
     }
 
     @Test
     fun `should throw when row index is out of bounds`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         assertThrows(IllegalArgumentException::class.java) {
             buffer[-1]
@@ -70,7 +70,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should initialize cursor at top left position`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         assertEquals(0, buffer.cursor.row)
         assertEquals(0, buffer.cursor.column)
@@ -78,7 +78,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should set cursor within screen bounds`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.setCursor(CursorPosition(row = 2, column = 4))
 
@@ -88,7 +88,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should throw when setting cursor outside screen row bounds`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         assertThrows(IllegalArgumentException::class.java) {
             buffer.setCursor(CursorPosition(row = -1, column = 0))
@@ -101,7 +101,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should throw when setting cursor outside screen column bounds`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         assertThrows(IllegalArgumentException::class.java) {
             buffer.setCursor(CursorPosition(row = 0, column = -1))
@@ -194,7 +194,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should write text within single line`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABC")
 
@@ -208,7 +208,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should wrap text to next line when reaching line end`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDE")
 
@@ -222,7 +222,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should write text across multiple lines`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDEFG")
 
@@ -236,7 +236,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should scroll screen when writing past bottom`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.writeText("ABCDEFGHIJK")
 
@@ -252,7 +252,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should preserve multiple scrolled rows in scrollback`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.writeText("ABCDEFGHIJKLMNOP")
 
@@ -269,7 +269,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should respect scrollback max size while scrolling`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 2)
+        val buffer = TerminalBuffer(5, 2, 2)
 
         buffer.writeText("ABCDEFGHIJKLMNOPQRSTU")
 
@@ -283,7 +283,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should insert text into empty line`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.insertText("ABC")
 
@@ -297,7 +297,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should insert text in the middle of existing line`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABDE")
         buffer.setCursor(CursorPosition(0, 2))
@@ -311,7 +311,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should shift characters right when inserting text`() {
-        val buffer = TerminalBuffer(width = 6, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(6, 3, 10)
 
         buffer.writeText("ABEF")
         buffer.setCursor(CursorPosition(0, 2))
@@ -325,7 +325,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should wrap overflow to next line when inserting`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDE")
         buffer.setCursor(CursorPosition(0, 2))
@@ -340,7 +340,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should cascade inserted text across multiple lines`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDEFGHIJ")
         buffer.setCursor(CursorPosition(0, 2))
@@ -354,7 +354,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should insert after prior write-triggered scroll state`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.writeText("ABCDEFGHIJ")
         buffer.setCursor(CursorPosition(0, 2))
@@ -369,7 +369,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should respect scrollback max size during insert scrolling`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 1)
+        val buffer = TerminalBuffer(5, 2, 1)
 
         buffer.writeText("ABCDEFGHIJ")
         buffer.setCursor(CursorPosition(0, 2))
@@ -384,7 +384,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should insert text at end of line`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCD")
         buffer.setCursor(CursorPosition(0, 4))
@@ -398,7 +398,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should insert into current screen content after prior scroll`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.writeText("ABCDEFGHIJ")
         buffer.setCursor(CursorPosition(0, 0))
@@ -413,7 +413,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should fill line with character`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.fillLine(1, 'X')
 
@@ -422,7 +422,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should clear line when filling with null`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDE")
         buffer.fillLine(0, null)
@@ -432,7 +432,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should not modify other lines when filling`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDE")
         buffer.fillLine(1, 'X')
@@ -443,7 +443,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should throw when row index is invalid`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         assertThrows(IllegalArgumentException::class.java) {
             buffer.fillLine(3, 'X')
@@ -452,7 +452,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should append empty line at bottom of screen`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDE")
         buffer.appendEmptyLine()
@@ -467,7 +467,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should preserve screen height when appending empty line`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.appendEmptyLine()
 
@@ -477,7 +477,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should append empty row at bottom after scrolling screen`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDE")
         buffer.setCursor(CursorPosition(1, 0))
@@ -495,7 +495,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should not modify cursor position when appending empty line`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.setCursor(CursorPosition(1, 3))
         buffer.appendEmptyLine()
@@ -506,7 +506,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should respect scrollback max size when appending empty line`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 1)
+        val buffer = TerminalBuffer(5, 2, 1)
 
         buffer.writeText("ABCDE")
         buffer.appendEmptyLine()
@@ -519,7 +519,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should clear all screen rows`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDEFG")
         buffer.clearScreen()
@@ -531,7 +531,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should preserve scrollback when clearing screen`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.writeText("ABCDEFGHIJ")
         buffer.clearScreen()
@@ -544,7 +544,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should reset cursor when clearing screen`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABC")
         buffer.setCursor(CursorPosition(1, 3))
@@ -557,7 +557,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should preserve screen dimensions when clearing screen`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDEFG")
         buffer.clearScreen()
@@ -569,7 +569,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should clear already empty screen`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.clearScreen()
 
@@ -582,7 +582,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should clear screen and scrollback`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.writeText("ABCDEFGHIJ")
         buffer.clearAll()
@@ -594,7 +594,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should reset cursor when clearing entire buffer`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDE")
         buffer.setCursor(CursorPosition(2, 3))
@@ -607,7 +607,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should preserve screen dimensions after clearAll`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDEFG")
         buffer.clearAll()
@@ -619,7 +619,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should clear scrollback completely`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.writeText("ABCDEFGHIJKLMNOP")
         assertTrue(buffer.scrollback.size() > 0)
@@ -631,7 +631,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should clear already empty buffer`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.clearAll()
 
@@ -644,7 +644,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should get character from screen`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABC")
 
@@ -656,7 +656,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should get character from scrollback`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.writeText("ABCDEFGHIJ")
 
@@ -666,7 +666,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should get attributes from screen`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("A")
 
@@ -680,7 +680,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should get line as string from screen`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABC")
 
@@ -690,7 +690,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should get line as string from scrollback`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.writeText("ABCDEFGHIJ")
 
@@ -699,7 +699,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should get entire screen content as string`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         buffer.writeText("ABCDEFG")
 
@@ -711,7 +711,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should get full content including scrollback and screen`() {
-        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+        val buffer = TerminalBuffer(5, 2, 10)
 
         buffer.writeText("ABCDEFGHIJ")
 
@@ -723,7 +723,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should throw when screen row index is invalid`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         assertThrows(IllegalArgumentException::class.java) {
             buffer.getLineAsString(3)
@@ -732,7 +732,7 @@ class TerminalBufferTest {
 
     @Test
     fun `should throw when scrollback row index is invalid`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         assertThrows(IllegalArgumentException::class.java) {
             buffer.getLineAsString(0, fromHistory = true)
@@ -741,10 +741,102 @@ class TerminalBufferTest {
 
     @Test
     fun `should throw when column index is invalid`() {
-        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+        val buffer = TerminalBuffer(5, 3, 10)
 
         assertThrows(IllegalArgumentException::class.java) {
             buffer.getCharAt(0, 5)
+        }
+    }
+
+    @Test
+    fun `should increase terminal buffer width and preserve content`() {
+        val buffer = TerminalBuffer(3, 2, 10)
+        buffer.writeText("ABC")
+
+        buffer.resize(5, 2)
+
+        assertEquals(5, buffer.width)
+        assertEquals(2, buffer.height)
+        assertEquals("ABC  ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+    }
+
+    @Test
+    fun `should decrease terminal buffer width and truncate screen and scrollback rows`() {
+        val buffer = TerminalBuffer(5, 2, 10)
+        buffer.writeText("ABCDEFGHIJ")
+
+        buffer.resize(3, 2)
+
+        assertEquals(3, buffer.width)
+        assertEquals(2, buffer.height)
+        assertEquals("ABC", buffer.scrollback[0].asString())
+        assertEquals("FGH", buffer[0].asString())
+        assertEquals("   ", buffer[1].asString())
+    }
+
+    @Test
+    fun `should increase terminal buffer height by appending empty rows`() {
+        val buffer = TerminalBuffer(5, 2, 10)
+        buffer.writeText("ABC")
+
+        buffer.resize(5, 4)
+
+        assertEquals(4, buffer.height)
+        assertEquals("ABC  ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+        assertEquals("     ", buffer[2].asString())
+        assertEquals("     ", buffer[3].asString())
+    }
+
+    @Test
+    fun `should decrease terminal buffer height and move removed rows to scrollback`() {
+        val buffer = TerminalBuffer(5, 4, 10)
+        buffer.fillLine(0, 'A')
+        buffer.fillLine(1, 'B')
+        buffer.fillLine(2, 'C')
+        buffer.fillLine(3, 'D')
+
+        buffer.resize(5, 2)
+
+        assertEquals(2, buffer.height)
+        assertEquals("AAAAA", buffer.scrollback[0].asString())
+        assertEquals("BBBBB", buffer.scrollback[1].asString())
+        assertEquals("CCCCC", buffer[0].asString())
+        assertEquals("DDDDD", buffer[1].asString())
+    }
+
+    @Test
+    fun `should clamp cursor when resizing terminal buffer`() {
+        val buffer = TerminalBuffer(5, 4, 10)
+        buffer.setCursor(CursorPosition(3, 4))
+
+        buffer.resize(3, 2)
+
+        assertEquals(1, buffer.cursor.row)
+        assertEquals(2, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should resize scrollback rows when resizing terminal buffer width`() {
+        val buffer = TerminalBuffer(5, 2, 10)
+        buffer.writeText("ABCDEFGHIJ")
+
+        buffer.resize(3, 2)
+
+        assertEquals("ABC", buffer.scrollback[0].asString())
+    }
+
+    @Test
+    fun `should throw when resizing terminal buffer to invalid size`() {
+        val buffer = TerminalBuffer(5, 2, 10)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.resize(0, 2)
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            buffer.resize(5, 0)
         }
     }
 }
