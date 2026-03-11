@@ -7,6 +7,7 @@ import com.vanjasretenovic.terminalbuffer.model.TerminalBuffer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class TerminalBufferTest {
@@ -573,6 +574,68 @@ class TerminalBufferTest {
         assertEquals("     ", buffer[0].asString())
         assertEquals("     ", buffer[1].asString())
         assertEquals("     ", buffer[2].asString())
+        assertEquals(0, buffer.cursor.row)
+        assertEquals(0, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should clear screen and scrollback`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJ")
+        buffer.clearAll()
+
+        assertEquals(0, buffer.scrollback.size())
+        assertEquals("     ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+    }
+
+    @Test
+    fun `should reset cursor when clearing entire buffer`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDE")
+        buffer.setCursor(CursorPosition(2, 3))
+
+        buffer.clearAll()
+
+        assertEquals(0, buffer.cursor.row)
+        assertEquals(0, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should preserve screen dimensions after clearAll`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDEFG")
+        buffer.clearAll()
+
+        assertEquals(5, buffer[0].width)
+        assertEquals(5, buffer[1].width)
+        assertEquals(5, buffer[2].width)
+    }
+
+    @Test
+    fun `should clear scrollback completely`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJKLMNOP")
+        assertTrue(buffer.scrollback.size() > 0)
+
+        buffer.clearAll()
+
+        assertEquals(0, buffer.scrollback.size())
+    }
+
+    @Test
+    fun `should clear already empty buffer`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.clearAll()
+
+        assertEquals(0, buffer.scrollback.size())
+        assertEquals("     ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
         assertEquals(0, buffer.cursor.row)
         assertEquals(0, buffer.cursor.column)
     }

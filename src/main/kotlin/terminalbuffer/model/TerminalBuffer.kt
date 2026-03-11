@@ -118,4 +118,10 @@ class TerminalBuffer(
         screen.clear()
         setCursor(CursorPosition(0, 0))
     }
+
+    fun clearAll() {
+        screen.clear()
+        scrollback.clear()
+        setCursor(CursorPosition(0, 0))
+    }
 }
