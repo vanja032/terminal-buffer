@@ -277,4 +277,134 @@ class TerminalBufferTest {
         assertEquals("PQRST", buffer[0].asString())
         assertEquals("U    ", buffer[1].asString())
     }
+
+    @Test
+    fun `should insert text into empty line`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.insertText("ABC")
+
+        assertEquals("ABC  ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+        assertEquals("     ", buffer[2].asString())
+
+        assertEquals(0, buffer.cursor.row)
+        assertEquals(3, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should insert text in the middle of existing line`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABDE")
+        buffer.setCursor(CursorPosition(0, 2))
+
+        buffer.insertText("C")
+
+        assertEquals("ABCDE", buffer[0].asString())
+        assertEquals(0, buffer.cursor.row)
+        assertEquals(3, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should shift characters right when inserting text`() {
+        val buffer = TerminalBuffer(width = 6, height = 3, historySize = 10)
+
+        buffer.writeText("ABEF")
+        buffer.setCursor(CursorPosition(0, 2))
+
+        buffer.insertText("CD")
+
+        assertEquals("ABCDEF", buffer[0].asString())
+        assertEquals(0, buffer.cursor.row)
+        assertEquals(4, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should wrap overflow to next line when inserting`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDE")
+        buffer.setCursor(CursorPosition(0, 2))
+
+        buffer.insertText("XY")
+
+        assertEquals("ABXYC", buffer[0].asString())
+        assertEquals("DE   ", buffer[1].asString())
+        assertEquals(0, buffer.cursor.row)
+        assertEquals(4, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should cascade inserted text across multiple lines`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJ")
+        buffer.setCursor(CursorPosition(0, 2))
+
+        buffer.insertText("XY")
+
+        assertEquals("ABXYC", buffer[0].asString())
+        assertEquals("DEFGH", buffer[1].asString())
+        assertEquals("IJ   ", buffer[2].asString())
+    }
+
+    @Test
+    fun `should insert after prior write-triggered scroll state`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJ")
+        buffer.setCursor(CursorPosition(0, 2))
+
+        buffer.insertText("XY")
+
+        assertEquals(1, buffer.scrollback.size())
+        assertEquals("ABCDE", buffer.scrollback[0].asString())
+        assertEquals("FGXYH", buffer[0].asString())
+        assertEquals("IJ   ", buffer[1].asString())
+    }
+
+    @Test
+    fun `should respect scrollback max size during insert scrolling`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 1)
+
+        buffer.writeText("ABCDEFGHIJ")
+        buffer.setCursor(CursorPosition(0, 2))
+
+        buffer.insertText("XYZ")
+
+        assertEquals(1, buffer.scrollback.size())
+        assertEquals("ABCDE", buffer.scrollback[0].asString())
+        assertEquals("FGXYZ", buffer[0].asString())
+        assertEquals("HIJ  ", buffer[1].asString())
+    }
+
+    @Test
+    fun `should insert text at end of line`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCD")
+        buffer.setCursor(CursorPosition(0, 4))
+
+        buffer.insertText("E")
+
+        assertEquals("ABCDE", buffer[0].asString())
+        assertEquals(1, buffer.cursor.row)
+        assertEquals(0, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should insert into current screen content after prior scroll`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.writeText("ABCDEFGHIJ")
+        buffer.setCursor(CursorPosition(0, 0))
+
+        buffer.insertText("Z")
+
+        assertEquals(1, buffer.scrollback.size())
+        assertEquals("ABCDE", buffer.scrollback[0].asString())
+        assertEquals("ZFGHI", buffer[0].asString())
+        assertEquals("J    ", buffer[1].asString())
+    }
 }

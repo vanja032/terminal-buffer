@@ -27,6 +27,10 @@ class TerminalBuffer(
 
     private fun setCellAt(row: Int, column: Int, cell: Cell) { screen[row][column] = cell }
 
+    private fun getCurrentCell() = getCellAt(cursor.row, cursor.column)
+
+    private fun setCurrentCell(cell: Cell) { setCellAt(cursor.row, cursor.column, cell) }
+
     private fun createCell(character: Char?) = Cell(character)
 
     private fun validateCursorPosition(cursorPosition: CursorPosition) {
@@ -62,7 +66,7 @@ class TerminalBuffer(
     fun moveCursorOnStartLine() { cursor = cursor.copy(column = 0) }
 
     fun writeChar(char: Char) {
-        setCellAt(cursor.row, cursor.column, createCell(char))
+        setCurrentCell(createCell(char))
 
         if (cursor.column == width - 1) newLine()
         else moveCursorRight()
@@ -81,5 +85,19 @@ class TerminalBuffer(
 
     fun writeText(text: String) {
         for (char in text) writeChar(char)
+    }
+
+    fun insertText(text: String) {
+        var index = 0
+        var tmpText: String = text
+        var savedCursor = CursorPosition(0, 0)
+
+        while (index < tmpText.length) {
+            if(!getCurrentCell().isEmpty) tmpText += getCurrentCell().character
+            writeChar(tmpText[index++])
+            if(index == text.length) savedCursor = cursor.copy()
+        }
+
+        cursor = savedCursor.copy()
     }
 }
