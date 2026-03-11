@@ -18,8 +18,12 @@ class TerminalBuffer(
         scrollback = Scrollback(historySize)
     }
 
-    operator fun get(row: Int): Row {
+    private fun validateRowIndex(row: Int) {
         require(row in 0 until height) { "Terminal row index $row out of $height" }
+    }
+
+    operator fun get(row: Int): Row {
+        validateRowIndex(row)
         return screen[row]
     }
 
@@ -99,5 +103,10 @@ class TerminalBuffer(
         }
 
         cursor = savedCursor.copy()
+    }
+
+    fun fillLine(index: Int, char: Char? = null) {
+        validateRowIndex(index)
+        for (col in 0 until width) setCellAt(index, col, createCell(char))
     }
 }
