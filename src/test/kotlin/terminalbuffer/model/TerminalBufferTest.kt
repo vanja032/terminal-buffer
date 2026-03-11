@@ -446,4 +446,71 @@ class TerminalBufferTest {
             buffer.fillLine(3, 'X')
         }
     }
+
+    @Test
+    fun `should append empty line at bottom of screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDE")
+        buffer.appendEmptyLine()
+
+        assertEquals("     ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+        assertEquals("     ", buffer[2].asString())
+
+        assertEquals(1, buffer.scrollback.size())
+        assertEquals("ABCDE", buffer.scrollback[0].asString())
+    }
+
+    @Test
+    fun `should preserve screen height when appending empty line`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 10)
+
+        buffer.appendEmptyLine()
+
+        assertEquals("     ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+    }
+
+    @Test
+    fun `should append empty row at bottom after scrolling screen`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.writeText("ABCDE")
+        buffer.setCursor(CursorPosition(1, 0))
+        buffer.writeText("FGHIJ")
+
+        buffer.appendEmptyLine()
+
+        assertEquals("FGHIJ", buffer[0].asString())
+        assertEquals("     ", buffer[1].asString())
+        assertEquals("     ", buffer[2].asString())
+
+        assertEquals(1, buffer.scrollback.size())
+        assertEquals("ABCDE", buffer.scrollback[0].asString())
+    }
+
+    @Test
+    fun `should not modify cursor position when appending empty line`() {
+        val buffer = TerminalBuffer(width = 5, height = 3, historySize = 10)
+
+        buffer.setCursor(CursorPosition(1, 3))
+        buffer.appendEmptyLine()
+
+        assertEquals(1, buffer.cursor.row)
+        assertEquals(3, buffer.cursor.column)
+    }
+
+    @Test
+    fun `should respect scrollback max size when appending empty line`() {
+        val buffer = TerminalBuffer(width = 5, height = 2, historySize = 1)
+
+        buffer.writeText("ABCDE")
+        buffer.appendEmptyLine()
+        buffer.writeText("FGHIJ")
+        buffer.appendEmptyLine()
+
+        assertEquals(1, buffer.scrollback.size())
+        assertEquals("FGHIJ", buffer.scrollback[0].asString())
+    }
 }

@@ -83,7 +83,7 @@ class TerminalBuffer(
             moveCursorDown()
         }
         else {
-            scrollback.add(screen.scroll())
+            appendEmptyLine()
         }
     }
 
@@ -108,5 +108,9 @@ class TerminalBuffer(
     fun fillLine(index: Int, char: Char? = null) {
         validateRowIndex(index)
         for (col in 0 until width) setCellAt(index, col, createCell(char))
+    }
+
+    fun appendEmptyLine() {
+        scrollback.add(screen.scroll())
     }
 }
