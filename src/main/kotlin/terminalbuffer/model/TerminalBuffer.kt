@@ -22,6 +22,14 @@ class TerminalBuffer(
         require(row in 0 until height) { "Terminal row index $row out of $height" }
     }
 
+    private fun validateColumnIndex(column: Int) {
+        require(column in 0 until width) { "Terminal column index $column out of $width" }
+    }
+
+    private fun validateScrollbackRowIndex(row: Int) {
+        require(row in 0 until scrollback.size()) { "History row index $row out of ${scrollback.size()}" }
+    }
+
     operator fun get(row: Int): Row {
         validateRowIndex(row)
         return screen[row]
@@ -123,5 +131,39 @@ class TerminalBuffer(
         screen.clear()
         scrollback.clear()
         setCursor(CursorPosition(0, 0))
+    }
+
+    private fun getRowAt(index: Int, fromHistory: Boolean = false): Row {
+        if (fromHistory) {
+            validateScrollbackRowIndex(index)
+            return scrollback[index]
+        }
+
+        validateRowIndex(index)
+        return screen[index]
+    }
+
+    fun getCharAt(row: Int, column: Int, fromHistory: Boolean = false): Char? {
+        validateColumnIndex(column)
+        return getRowAt(row, fromHistory)[column].character
+    }
+
+    fun getAttributesAt(row: Int, column: Int, fromHistory: Boolean = false): Cell {
+        validateColumnIndex(column)
+        return getRowAt(row, fromHistory)[column]
+    }
+
+    fun getLineAsString(index: Int, fromHistory: Boolean = false): String {
+        return getRowAt(index, fromHistory).asString()
+    }
+
+    fun getScreenContent(): String {
+        return (0 until height).joinToString("\n") { screen[it].asString() }
+    }
+
+    fun getFullContent(): String {
+        val history = (0 until scrollback.size()).map { scrollback[it].asString() }
+        val visible = (0 until height).map { screen[it].asString() }
+        return (history + visible).joinToString("\n")
     }
 }
