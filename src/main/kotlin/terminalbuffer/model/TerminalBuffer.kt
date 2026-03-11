@@ -113,4 +113,9 @@ class TerminalBuffer(
     fun appendEmptyLine() {
         scrollback.add(screen.scroll())
     }
+
+    fun clearScreen() {
+        screen.clear()
+        setCursor(CursorPosition(0, 0))
+    }
 }
