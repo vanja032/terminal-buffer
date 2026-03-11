@@ -122,7 +122,7 @@ class TerminalBuffer(
 
     fun fillLine(index: Int, char: Char? = null) {
         validateRowIndex(index)
-        for (col in 0 until width) setCellAt(index, col, createCell(char))
+        screen[index].fill(createCell(char))
     }
 
     fun appendEmptyLine() {
