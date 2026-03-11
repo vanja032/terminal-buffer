@@ -24,4 +24,10 @@ class Scrollback(val maxSize: Int) {
     fun size() = rows.size
 
     fun clear() { rows.clear(); }
+
+    fun resize(newWidth: Int) {
+        require(newWidth > 0) { "New width must be greater than zero" }
+
+        for (i in 0 until rows.size) rows.elementAt(i).resize(newWidth)
+    }
 }
